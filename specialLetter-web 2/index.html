@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Senin İçin 💌 Dünya Prensesler Günü</title>
+<meta name="description" content="Dünya Prensesler Günü'ne özel bir mektup." />
+<meta name="theme-color" content="#030203" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌹</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet" />
+<style>
+  :root { --bg: #030203; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); overflow: hidden; }
+  body {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #f6dbe6; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-tap-highlight-color: transparent; user-select: none;
+  }
+  #stage { position: relative; display: flex; flex-direction: column; align-items: center; }
+  canvas { display: block; }
+  #caption {
+    height: 124px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    text-align: center; padding: 4px 12px 0;
+  }
+  #caption .msg {
+    font-family: "Dancing Script", cursive; font-size: clamp(22px, 5.4vw, 40px); line-height: 1.2;
+    color: #ffd6e4; min-height: 1.25em;
+    text-shadow: 0 0 22px rgba(255, 70, 120, .65), 0 0 6px rgba(255, 190, 210, .7);
+  }
+  .word { display: inline-block; white-space: nowrap; }
+  .word > span { white-space: pre; }
+  #caption .msg .word > span { opacity: 0; display: inline-block; transform: translateY(6px); filter: blur(4px);
+    transition: opacity .7s ease, transform .7s ease, filter .7s ease, color 1.2s ease; color: #ffb36b; white-space: pre; }
+  #caption .msg .word > span.on { opacity: 1; transform: none; filter: none; color: #ffd6e4; }
+  #caption .msg .word > span.emo { text-shadow: 0 0 14px rgba(255, 60, 110, .8); margin-left: .12em; }
+  #caption .sig {
+    align-self: flex-end; margin-right: clamp(8px, 12%, 140px); margin-top: 2px; min-height: 1.6em;
+    font: 700 clamp(13px, 2.4vw, 17px) "JetBrains Mono", Consolas, monospace;
+    color: #e9c3d2; letter-spacing: .06em; text-shadow: 0 0 10px rgba(255, 110, 160, .35);
+  }
+  #caption .sig .cur { opacity: 0; }
+  #caption .sig.typing .cur { opacity: 1; }
+  .cur {
+    display: inline-block; width: .6em; margin-left: 2px; color: #c47bff;
+    text-shadow: 0 0 10px rgba(190, 110, 255, .9); animation: blink .9s steps(1) infinite;
+  }
+  @keyframes beat { 0%,100% { transform: scale(1); } 25% { transform: scale(1.18); } 45% { transform: scale(.96); } }
+  #replay {
+    position: fixed; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 4;
+    background: rgba(255,255,255,.06); color: #e9c3d2; border: 1px solid rgba(255,255,255,.12);
+    border-radius: 999px; padding: 8px 14px; font-size: 13px; cursor: pointer;
+    opacity: 0; transition: opacity .6s ease, background .2s;
+  }
+  #replay.show { opacity: .8; }
+  #replay:hover { background: rgba(255,255,255,.12); opacity: 1; }
+  #intro {
+    position: fixed; inset: 0; z-index: 6; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at center, #0b0610 0%, var(--bg) 70%);
+    transition: opacity 1.2s ease;
+  }
+  #intro.hide { opacity: 0; pointer-events: none; }
+  #intro .box { text-align: center; padding: 0 18px; }
+  #intro .orn {
+    font: 700 clamp(11px, 2.2vw, 15px) "JetBrains Mono", Consolas, monospace; letter-spacing: .08em;
+    white-space: pre; opacity: 0; transition: opacity 1.4s ease;
+  }
+  #intro .orn.on { opacity: 1; }
+  #intro .l1 {
+    font: 700 clamp(13px, 3.1vw, 21px) "JetBrains Mono", Consolas, monospace;
+    color: #e9c3d2; letter-spacing: .04em; min-height: 1.6em; margin: 22px 0 6px;
+    text-shadow: 0 0 10px rgba(255, 110, 160, .35);
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  #intro .l2 {
+    font-family: "Dancing Script", cursive; font-size: clamp(38px, 9vw, 74px); line-height: 1.25;
+    color: #ffd6e4; min-height: 1.3em; margin-bottom: 18px;
+    text-shadow: 0 0 22px rgba(255, 70, 120, .65), 0 0 6px rgba(255, 190, 210, .7);
+  }
+  #intro .l2 .word > span { opacity: 0; display: inline-block; transform: translateY(6px); filter: blur(4px);
+    transition: opacity .7s ease, transform .7s ease, filter .7s ease, color 1.2s ease; color: #ffb36b; }
+  #intro .l2 .word > span.on { opacity: 1; transform: none; filter: none; color: #ffd6e4; }
+  #intro .wait { margin-top: 26px; font-size: 13px; color: #9b7a88; letter-spacing: .08em; opacity: 0; transition: opacity .8s; }
+  #intro .wait.on { opacity: 1; }
+  #intro .star { position: absolute; font: 700 13px "JetBrains Mono", monospace; animation: tw 3s ease-in-out infinite; }
+  @keyframes tw { 0%,100% { opacity: .05; } 50% { opacity: .9; } }
+</style>
+</head>
+<body>
+  <div id="intro">
+    <div class="box">
+      <div class="orn" id="o1"></div>
+      <div class="l1"><span id="l1t"></span><span class="cur">▌</span></div>
+      <div class="l2" id="l2"></div>
+      <div class="orn" id="o2"></div>
+      <div class="wait" id="wait">💌 mektubun hazırlanıyor…</div>
+    </div>
+  </div>
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div id="caption"><div class="msg" id="msg"></div><div class="sig" id="sig"><span id="sigt"></span><span class="cur">▌</span></div></div>
+  </div>
+  <button id="replay" type="button" aria-label="Tekrar oynat">↻ Tekrar</button>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js"></script>
+<script>
+// ======== Ayarlar (istediğin gibi değiştir) ========
+const MESAJ = "Dünya Prensesler Günün kutlu olsun ❤️";
+const IMZA = "— Alpan";
+const MESAJ_SANIYE = 11.5;   // gül tamamlandıktan sonra mesajın çıkacağı an
+const GIRIS_1 = "tanıdığım en güzel ve komik insan";
+const GIRIS_2 = "Ebru Dora Turan'a";
+// ===================================================
+
+const FONT_PX = 11;                       // tkinter 8pt ≈ 11px
+const FONT = `700 ${FONT_PX}px "JetBrains Mono", "DejaVu Sans Mono", Consolas, "Courier New", monospace`;
+const CAPTION_H = 124;
+
+const cv = document.getElementById("c");
+const ctx = cv.getContext("2d");
+const intro = document.getElementById("intro");
+const caption = document.getElementById("caption");
+const replay = document.getElementById("replay");
+
+// --- Python'un çizdiği hücreler ---
+let W = 600, H = 600, BG = "#030203";
+const X = [], Y = [], T = [], F = [];
+let dirty = false, startedAt = null;
+
+window.webtkApply = (s) => {
+  const ops = s.split("\x1e");
+  for (let k = 0; k < ops.length; k++) {
+    const f = ops[k].split("\x1f");
+    const op = f[0];
+    if (op === "u") {
+      const i = +f[1]; T[i] = f[2]; if (f[3]) F[i] = f[3];
+    } else if (op === "c") {
+      const i = +f[1]; X[i] = +f[2]; Y[i] = +f[3]; T[i] = f[4]; F[i] = f[5];
+    } else if (op === "b") {
+      W = +f[1]; H = +f[2]; BG = f[3];
+      document.documentElement.style.setProperty("--bg", BG);
+      fit();
+    }
+  }
+  dirty = true;
+  if (startedAt === null) { startedAt = performance.now(); onStart(); }
+};
+
+let scale = 1;
+function fit() {
+  const availW = window.innerWidth - 16;
+  const availH = window.innerHeight - CAPTION_H - 16;
+  scale = Math.max(0.3, Math.min(availW / W, availH / H));
+  const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  cv.style.width = Math.round(W * scale) + "px";
+  cv.style.height = Math.round(H * scale) + "px";
+  cv.width = Math.round(W * scale * dpr);
+  cv.height = Math.round(H * scale * dpr);
+  ctx.setTransform(scale * dpr, 0, 0, scale * dpr, 0, 0);
+  ctx.font = FONT;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  dirty = true;
+}
+window.addEventListener("resize", fit);
+
+function draw() {
+  if (dirty) {
+    dirty = false;
+    ctx.fillStyle = BG;
+    ctx.fillRect(0, 0, W, H);
+    let cur = "";
+    for (let i = 1; i < T.length; i++) {
+      const t = T[i];
+      if (t === undefined || t === " ") continue;
+      const f = F[i];
+      if (f !== cur) { ctx.fillStyle = f; cur = f; }
+      ctx.fillText(t, X[i], Y[i]);
+    }
+  }
+  if (startedAt !== null) {
+    const el = (performance.now() - startedAt) / 1000;
+    if (el > MESAJ_SANIYE && !captionShown) { captionShown = true; showCaption(); }
+    replay.classList.toggle("show", el > MESAJ_SANIYE + 6);
+  }
+  requestAnimationFrame(draw);
+}
+
+function onStart() {}
+
+// ---- Giriş yazısı ----
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+function ornament(el, n) {
+  // Python'daki ateş/gül paletinden renkli ASCII süs: -=+*  ♥  *+=-
+  const left = "·-=+*#", cols = ["#4a0a10", "#7a1220", "#b01a2a", "#e0283a", "#ff5a4a", "#ff9d7a"];
+  let h = "";
+  for (let i = 0; i < n; i++) { const k = Math.floor(i / n * left.length); h += `<span style="color:${cols[k]}">${left[k]}</span>`; }
+  const mid = `<span style="color:#ff6f9e;text-shadow:0 0 10px #ff3f7f"> ♥ </span>`;
+  let r = ""; for (let i = n - 1; i >= 0; i--) { const k = Math.floor(i / n * left.length); r += `<span style="color:${cols[k]}">${left[k]}</span>`; }
+  el.innerHTML = h + mid + r;
+}
+function stars() {
+  const chars = "*+.", cols = ["#bcd6ff", "#8fb4ff", "#ffffff"];
+  for (let i = 0; i < 38; i++) {
+    const s = document.createElement("span");
+    s.className = "star"; s.textContent = chars[i % 3];
+    s.style.left = Math.random() * 100 + "vw"; s.style.top = Math.random() * 100 + "vh";
+    s.style.color = cols[i % 3]; s.style.animationDelay = (-Math.random() * 3) + "s";
+    s.style.animationDuration = (2 + Math.random() * 3) + "s";
+    intro.appendChild(s);
+  }
+}
+async function playIntro() {
+  stars();
+  ornament(document.getElementById("o1"), 12);
+  ornament(document.getElementById("o2"), 12);
+  await sleep(500);
+  document.getElementById("o1").classList.add("on");
+  await sleep(700);
+  const t1 = document.getElementById("l1t");
+  for (const ch of GIRIS_1) { t1.textContent += ch; await sleep(ch === " " ? 90 : 55 + Math.random() * 45); }
+  await sleep(450);
+  const l2 = document.getElementById("l2");
+  const spans = letterSpans(l2, GIRIS_2);
+  for (const s of spans) { s.classList.add("on"); await sleep(110); }
+  document.getElementById("o2").classList.add("on");
+  await sleep(2600);
+  if (!window.__pyReady) document.getElementById("wait").classList.add("on");
+}
+function hideIntro() { intro.classList.add("hide"); setTimeout(() => intro.remove(), 1300); }
+
+// ---- Son mesaj + imza ----
+let captionShown = false, capToken = 0;
+const graphemes = (str) => typeof Intl.Segmenter === "function"
+  ? [...new Intl.Segmenter("tr", { granularity: "grapheme" }).segment(str)].map(x => x.segment)
+  : [...str];
+// Metni kelime kelime (kırılmayan) gruplara, harfleri tek tek span'lere böler;
+// emoji önceki kelimeye yapışık kalır ki tek başına alt satıra düşmesin.
+function letterSpans(parent, text) {
+  const isEmo = (w) => /\p{Extended_Pictographic}/u.test(w);
+  const words = [];
+  for (const w of text.split(" ").filter(Boolean)) {
+    if (isEmo(w) && words.length) words[words.length - 1] += "\u00a0" + w; else words.push(w);
+  }
+  const spans = [];
+  words.forEach((w, wi) => {
+    if (wi) parent.appendChild(document.createTextNode(" "));
+    const wrap = document.createElement("span");
+    wrap.className = "word";
+    for (const ch of graphemes(w)) {
+      const s = document.createElement("span"); s.textContent = ch;
+      if (isEmo(ch)) s.classList.add("emo");
+      wrap.appendChild(s); spans.push(s);
+    }
+    parent.appendChild(wrap);
+  });
+  return spans;
+}
+function resetCaption() {
+  capToken++; captionShown = false;
+  document.getElementById("msg").innerHTML = "";
+  document.getElementById("sigt").textContent = "";
+  document.getElementById("sig").classList.remove("typing");
+}
+async function showCaption() {
+  const my = ++capToken;
+  const msg = document.getElementById("msg");
+  msg.innerHTML = "";
+  const spans = letterSpans(msg, MESAJ);
+  for (const s of spans) { if (my !== capToken) return; s.classList.add("on"); await sleep(85); }
+  await sleep(700);
+  const sig = document.getElementById("sig"), t = document.getElementById("sigt");
+  sig.classList.add("typing");
+  for (const ch of IMZA) { if (my !== capToken) return; t.textContent += ch; await sleep(ch === " " ? 120 : 110 + Math.random() * 60); }
+  await sleep(2400);
+  if (my === capToken) sig.classList.remove("typing");
+}
+
+let pyodide = null;
+function restart() {
+  if (!pyodide) return;
+  pyodide.globals.get("webtk_fire")("r");
+  startedAt = performance.now();
+  resetCaption();
+  replay.classList.remove("show");
+}
+replay.addEventListener("click", (e) => { e.stopPropagation(); restart(); });
+window.addEventListener("keydown", (e) => { if (e.key === "r" || e.key === "R") restart(); });
+
+async function main() {
+  try {
+    await document.fonts.load(FONT).catch(() => {});
+    ctx.font = FONT;
+    const CW = Math.max(1, Math.ceil(ctx.measureText("M").width));
+    const CH = Math.round(FONT_PX * 1.2);
+    // Yüksek bir değer vererek Python tarafında en detaylı ızgarayı (46 satır) seçtiriyoruz;
+    // sonra canvas ekrana sığacak şekilde ölçekleniyor.
+    window.WEBTK = { CW, CH, screenH: 1100, screenW: 1920 };
+
+    const introDone = playIntro();
+    const [shim, letter] = await Promise.all([
+      fetch("py/webtk.py").then(r => { if (!r.ok) throw new Error("webtk.py"); return r.text(); }),
+      fetch("py/letter.py").then(r => { if (!r.ok) throw new Error("letter.py"); return r.text(); }),
+      (async () => { pyodide = await loadPyodide(); })(),
+    ]);
+    pyodide.FS.writeFile("/home/pyodide/webtk.py", shim);
+    pyodide.runPython("import webtk\nwebtk_fire = webtk.fire_key");
+    window.__pyReady = true;
+    await introDone;
+    hideIntro();
+    await sleep(900);
+    requestAnimationFrame(draw);
+    pyodide.runPython(letter);   // orijinal letter.py, olduğu gibi
+  } catch (err) {
+    console.error(err);
+    const w = document.getElementById("wait");
+    if (w) { w.textContent = "Yüklenemedi, sayfayı yenilemeyi dene 💔"; w.classList.add("on"); }
+  }
+}
+main();
+</script>
+</body>
+</html>
